@@ -1,5 +1,5 @@
 module Test where
-import Lab1 
+import           Lab1
 
 a, b :: TERM Set
 a = Union Empty (Singleton (Empty))
