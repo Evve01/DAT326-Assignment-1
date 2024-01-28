@@ -63,7 +63,7 @@ varVal vss x = findS vss
     where findS ((v, s):vss)| x==v = s
                             | otherwise = findS vss
 
-type Von v = TERM v
+type Von v = TERM v 
 vonNeumann :: Integer -> Von v
 vonNeumann 0 = Empty
 vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
@@ -75,10 +75,16 @@ vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
 n1 = vonNeumann 1
 n2 = vonNeumann 2
 
+e = [] :: Env Set Set
+
 claim1 :: Integer -> Integer -> Bool
 claim1 n1 n2 = n1 <= n2 && subset (eval e v1) (eval e v2) 
   where 
-    e = []:: Env Set Set
     (v1, v2) = (vonNeumann n1, vonNeumann n2)
   
-  
+claim2 :: Integer -> Bool 
+claim2 0 = True
+claim2 n = check e (Subset vn v) && claim2 (n-1)
+  where 
+    v = vonNeumann n
+    vn = vonNeumann (n-1)
