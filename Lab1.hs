@@ -1,4 +1,5 @@
 module Lab1 where
+import Data.List
 
 type Env var dom = [(var, dom)]
 
@@ -15,10 +16,10 @@ data PRED v =   Elem (v) (TERM v)
                 | Implies (PRED v) (PRED v)
 
 newtype Set = S [Set]
-instance Eq Set where
-    (S []) == (S [])  = True
-    (S []) == set     = len set == 0
-    set == (S [])     = len set == 0
+    deriving(Eq)
+
+instance Show Set where
+    show set = show (len set)
 
 len :: Set -> Int
 len (S set) = length set
@@ -27,8 +28,8 @@ get :: Set -> [Set]
 get (S set) = set
 
 check :: Eq v => Env v Set -> PRED v -> Bool
-check e (Elem var x)  = elemS (varVal e var) (eval e x)
-check e (Subset x y)  = subsetS (eval e x) (eval e y)
+check e (Elem var x)  = elem (varVal e var) (nub (get (eval e x)))
+check e (Subset x y)  = subset (eval e x) (eval e y)
 check e (And x y)     = (check e x) && (check e y)
 check e (Or x y)      = (check e x) || (check e y)
 check e (Implies x y) = (check e x) ==> (check e y)
@@ -37,27 +38,40 @@ check e (Implies x y) = (check e x) ==> (check e y)
 False ==> _ = True
 True ==> p = p
 
-subsetS :: Set -> Set -> Bool
-subsetS (S xs) (S ys)   | len (S xs) == 0 = True
-                        | len (S ys) == 0 = False
-                        | len (S (tail xs)) == 0 = False
-                        | otherwise = (elem (head xs) ys) && (subset (S (tail xs)) (S ys))
+subset :: Set -> Set -> Bool
+subset set1 set2 = (len (intersectS set1 set2) /= 0) && 
+                    (min (len set1) (len set2) == len (set1))
 
 eval :: Eq v => Env v Set -> TERM v -> Set
 eval e (Empty)            = S []
-eval e (Singleton x)      = S [eval e x]
---eval e (Union x y)        = union (eval e x) (eval e y)
---eval e (Intersection x y) = intersection (eval e x) (eval e y)
+eval e (Singleton x)      = S [(eval e x)]
+eval e (Union x y)        = unionS (eval e x) (eval e y)
+eval e (Intersection x y) = intersectS (eval e x) (eval e y)
 eval e (Var var)          = varVal e var
 
---union :: Set -> Set
+unionS :: Set -> Set -> Set
+unionS set1 set2 = S (union ((get set1)) ((get set2)))
 
---intersection :: Set -> Set
+intersectS :: Set -> Set -> Set
+intersectS set1 set2 = S (intersect ((get set1)) ((get set2)))
 
 varVal :: Eq v => Env v Set -> v -> Set  
 varVal vss x = findS vss
     where findS ((v, s):vss)| x==v = s
                             | otherwise = findS vss
 
+a, b :: TERM Set
+a = Union Empty (Singleton (Empty))
+b = Union Empty Empty
+c = Union (Singleton Empty) (Singleton (Singleton (Empty)))
 
-a = ([] :: [] Set)
+e :: Env Set Set
+e = [
+    (S [], S [S [], S [S []], S [S [S []]]])]
+
+vonNeumann :: Integer -> TERM v
+vonNeumann 0 = Empty
+vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
+
+-- claim1: if n1 <= n2 then subset n1 n2
+-- claim2: n = {0, 1,..., n - 1}
