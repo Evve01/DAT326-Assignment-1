@@ -1,6 +1,6 @@
 module Lab1 where
 import           Data.List
-import GHC.SourceGen (where')
+import           GHC.SourceGen (where')
 
 type Env var dom = [(var, dom)]
 
@@ -9,12 +9,14 @@ data TERM v =   Empty
                 | Union (TERM v) (TERM v)
                 | Intersection (TERM v) (TERM v)
                 | Var v
+                deriving (Show)
 
 data PRED v =   Elem v (TERM v)
                 | Subset (TERM v) (TERM v)
                 | And (PRED v) (PRED v)
                 | Or (PRED v) (PRED v)
                 | Implies (PRED v) (PRED v)
+                deriving (Show)
 
 newtype Set = S [Set]
     deriving(Eq)
@@ -63,7 +65,7 @@ varVal vss x = findS vss
     where findS ((v, s):vss)| x==v = s
                             | otherwise = findS vss
 
-type Von v = TERM v 
+type Von v = TERM v
 vonNeumann :: Integer -> Von v
 vonNeumann 0 = Empty
 vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
@@ -78,13 +80,13 @@ n2 = vonNeumann 2
 e = [] :: Env Set Set
 
 claim1 :: Integer -> Integer -> Bool
-claim1 n1 n2 = n1 <= n2 && subset (eval e v1) (eval e v2) 
-  where 
+claim1 n1 n2 = n1 <= n2 && subset (eval e v1) (eval e v2)
+  where
     (v1, v2) = (vonNeumann n1, vonNeumann n2)
-  
-claim2 :: Integer -> Bool 
-claim2 0 = True
+
+claim2 :: Integer -> Bool
+claim2 1 = True
 claim2 n = check e (Subset vn v) && claim2 (n-1)
-  where 
+  where
     v = vonNeumann n
     vn = vonNeumann (n-1)
