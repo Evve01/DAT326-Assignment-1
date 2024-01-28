@@ -75,8 +75,5 @@ n1 = vonNeumann 1
 n2 = vonNeumann 2
 
 claim1 :: Integer -> Integer -> Bool
-claim1 n1 n2 = n1 <= n2 && subset (eval [] v1) (eval [] v2) 
-  where 
-    v1 = vonNeumann n1
-    v2 = vonNeumann n2
+claim1 n1 n2 = n1 <= n2 && subset (eval ([]:: Env Set Set) (vonNeumann n1)) (eval ([]:: Env Set Set) (vonNeumann n2)) 
   
