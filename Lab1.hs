@@ -1,5 +1,6 @@
 module Lab1 where
 import           Data.List
+import GHC.SourceGen (where')
 
 type Env var dom = [(var, dom)]
 
@@ -75,5 +76,9 @@ n1 = vonNeumann 1
 n2 = vonNeumann 2
 
 claim1 :: Integer -> Integer -> Bool
-claim1 n1 n2 = n1 <= n2 && subset (eval ([]:: Env Set Set) (vonNeumann n1)) (eval ([]:: Env Set Set) (vonNeumann n2)) 
+claim1 n1 n2 = n1 <= n2 && subset (eval e v1) (eval e v2) 
+  where 
+    e = []:: Env Set Set
+    (v1, v2) = (vonNeumann n1, vonNeumann n2)
+  
   
