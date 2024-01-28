@@ -60,15 +60,6 @@ varVal vss x = findS vss
     where findS ((v, s):vss)| x==v = s
                             | otherwise = findS vss
 
-a, b :: TERM Set
-a = Union Empty (Singleton (Empty))
-b = Union Empty Empty
-c = Union (Singleton Empty) (Singleton (Singleton (Empty)))
-
-e :: Env Set Set
-e = [
-    (S [], S [S [], S [S []], S [S [S []]]])]
-
 vonNeumann :: Integer -> TERM v
 vonNeumann 0 = Empty
 vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
