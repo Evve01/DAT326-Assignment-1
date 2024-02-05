@@ -93,12 +93,13 @@ claim1 n1 n2 = (n1 <= n2) ==> subset (eval e v1) (eval e v2)
 -- claim2: n = {0, 1,..., n - 1}
 --         v = vn 
 claim2 :: Integer -> Bool
--- claim2 0 = vonNeumann 0 == Empty 
-claim2 0 = True
+claim2 0 = eval e (vonNeumann 0) == S []
 claim2 n = check e (Subset vn v)
   where
     v = vonNeumann n
     vn = vonNeumann (n - 1)
+-- claim2 0 = vonNeumann 0 == Empty 
+-- claim2 n = check e (Subset vn v)
 -- claim2 0 = vonNeumann 0 == Empty
 -- claim2 n = check e (Subset vn v) && claim2 (n - 1)
 --   where
@@ -108,7 +109,7 @@ claim2 n = check e (Subset vn v)
 {-
 Elem should input two terms - OK
 Empty should be a subset of empty.  - OK
-Subset uses the wrong equality. 
+Subset uses the wrong equality.  - OK
 
 claim1 doesn't work - OK
 claim2 hardcodes true and fails for 0, and is difficult to read.
