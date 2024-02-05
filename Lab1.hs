@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use infix" #-}
 module Lab1 where
 
 import Data.List
@@ -21,7 +23,10 @@ data PRED v
   deriving (Show)
 
 newtype Set = S [Set]
-  deriving (Eq)
+  -- deriving (Eq)
+
+instance Eq Set where
+  (S s1) == (S s2) = sort (nub s1) == sort (nub s2)
 
 instance Show Set where
   show set = show (len set)
@@ -30,10 +35,10 @@ len :: Set -> Int
 len (S set) = length set
 
 get :: Set -> [Set]
-get (S set) = set
+get (S set) = nub set
 
 check :: Eq v => Env v Set -> PRED v -> Bool
-check e (Elem var x) = elem (varVal e var) (nub (get (eval e x)))
+check e (Elem x y) = elem (eval e x) (get (eval e y))
 check e (Subset x y) = subset (eval e x) (eval e y)
 check e (And x y) = check e x && check e y
 check e (Or x y) = check e x || check e y
@@ -53,20 +58,13 @@ eval e Empty = S []
 eval e (Singleton x) = S [eval e x]
 eval e (Union x y) = unionS (eval e x) (eval e y)
 eval e (Intersection x y) = intersectS (eval e x) (eval e y)
-eval e (Var var) = varVal e var
+eval e (Var var) = e var
 
 unionS :: Set -> Set -> Set
 unionS set1 set2 = S (union (get set1) (get set2))
 
 intersectS :: Set -> Set -> Set
 intersectS set1 set2 = S (intersect (get set1) (get set2))
-
-varVal :: Eq v => Env v Set -> v -> Set
-varVal vss x = findS vss
-  where
-    findS ((v, s) : vss)
-      | x == v = s
-      | otherwise = findS vss
 
 type Von v = TERM v
 
