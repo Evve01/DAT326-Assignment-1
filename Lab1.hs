@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+
 {-# HLINT ignore "Use infix" #-}
 module Lab1 where
 
@@ -23,7 +24,7 @@ data PRED v
   deriving (Show)
 
 newtype Set = S [Set]
-  -- deriving (Eq)
+  deriving (Ord)
 
 instance Eq Set where
   (S s1) == (S s2) = sort (nub s1) == sort (nub s2)
@@ -49,16 +50,20 @@ False ==> _ = True
 True ==> p = p
 
 subset :: Set -> Set -> Bool
+subset (S []) _ = True
 subset set1 set2 = (len inter /= 0) && inter == set1
   where
     inter = intersectS set1 set2
+
+varVal :: Eq v => Env v Set -> v -> Set
+varVal e v = head [d | (v', d) <- e, v == v']
 
 eval :: Eq v => Env v Set -> TERM v -> Set
 eval e Empty = S []
 eval e (Singleton x) = S [eval e x]
 eval e (Union x y) = unionS (eval e x) (eval e y)
 eval e (Intersection x y) = intersectS (eval e x) (eval e y)
-eval e (Var var) = e var
+eval e (Var var) = varVal e var
 
 unionS :: Set -> Set -> Set
 unionS set1 set2 = S (union (get set1) (get set2))
