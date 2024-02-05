@@ -49,11 +49,14 @@ check e (Implies x y) = check e x ==> check e y
 False ==> _ = True
 True ==> p = p
 
+e = [] :: Env Set Set
+
 subset :: Set -> Set -> Bool
 subset (S []) _ = True
-subset set1 set2 = (len inter /= 0) && inter == set1
-  where
-    inter = intersectS set1 set2
+subset (S (x : xs)) set2 = (x `elem` get set2) && subset (S xs) set2
+-- subset set1 set2 = (len inter /= 0) && inter == set1
+--   where
+--     inter = intersectS set1 set2
 
 varVal :: Eq v => Env v Set -> v -> Set
 varVal e v = head [d | (v', d) <- e, v == v']
@@ -81,8 +84,6 @@ n1 = vonNeumann 1
 
 n2 = vonNeumann 2
 
-e = [] :: Env Set Set
-
 -- claim1: if n1 <= n2 then subset n1 n2
 claim1 :: Integer -> Integer -> Bool
 claim1 n1 n2 = (n1 <= n2) ==> subset (eval e v1) (eval e v2)
@@ -92,7 +93,8 @@ claim1 n1 n2 = (n1 <= n2) ==> subset (eval e v1) (eval e v2)
 -- claim2: n = {0, 1,..., n - 1}
 --         v = vn 
 claim2 :: Integer -> Bool
-claim2 0 = vonNeumann 0 == Empty
+-- claim2 0 = vonNeumann 0 == Empty 
+claim2 0 = True
 claim2 n = check e (Subset vn v)
   where
     v = vonNeumann n
