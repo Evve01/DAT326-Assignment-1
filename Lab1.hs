@@ -13,7 +13,7 @@ data TERM v
   | Union (TERM v) (TERM v)
   | Intersection (TERM v) (TERM v)
   | Var v
-  deriving (Show)
+  deriving (Show, Eq)
 
 data PRED v
   = Elem (TERM v) (TERM v)
@@ -77,24 +77,37 @@ vonNeumann :: Integer -> Von v
 vonNeumann 0 = Empty
 vonNeumann x = Union (vonNeumann (x - 1)) (Singleton (vonNeumann (x - 1)))
 
--- claim1: if n1 <= n2 then subset n1 n2
--- claim2: n = {0, 1,..., n - 1}
---
-
 n1 = vonNeumann 1
 
 n2 = vonNeumann 2
 
 e = [] :: Env Set Set
 
+-- claim1: if n1 <= n2 then subset n1 n2
 claim1 :: Integer -> Integer -> Bool
-claim1 n1 n2 = n1 <= n2 && subset (eval e v1) (eval e v2)
+claim1 n1 n2 = (n1 <= n2) ==> subset (eval e v1) (eval e v2)
   where
     (v1, v2) = (vonNeumann n1, vonNeumann n2)
 
+-- claim2: n = {0, 1,..., n - 1}
+--         v = vn 
 claim2 :: Integer -> Bool
-claim2 1 = True
-claim2 n = check e (Subset vn v) && claim2 (n - 1)
+claim2 0 = vonNeumann 0 == Empty
+claim2 n = check e (Subset vn v)
   where
     v = vonNeumann n
     vn = vonNeumann (n - 1)
+-- claim2 0 = vonNeumann 0 == Empty
+-- claim2 n = check e (Subset vn v) && claim2 (n - 1)
+--   where
+--     v = vonNeumann n
+--     vn = vonNeumann (n - 1)
+
+{-
+Elem should input two terms - OK
+Empty should be a subset of empty.  - OK
+Subset uses the wrong equality. 
+
+claim1 doesn't work - OK
+claim2 hardcodes true and fails for 0, and is difficult to read.
+-}
