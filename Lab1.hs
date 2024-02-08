@@ -27,7 +27,8 @@ newtype Set = S [Set]
   deriving (Ord)
 
 instance Eq Set where
-  (S s1) == (S s2) = sort (nub s1) == sort (nub s2)
+  -- (S s1) == (S s2) = sort (nub s1) == sort (nub s2)
+  (S s1) == (S s2) = all (`elem` s2) s1 && all (`elem` s1) s2
 
 instance Show Set where
   show set = show (len set)
