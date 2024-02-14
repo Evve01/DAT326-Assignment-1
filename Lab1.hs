@@ -3,7 +3,7 @@
 {-# HLINT ignore "Use infix" #-}
 module Lab1 where
 
-import Data.List
+import           Data.List
 
 type Env var dom = [(var, dom)]
 
@@ -40,31 +40,31 @@ get :: Set -> [Set]
 get (S set) = nub set
 
 check :: Eq v => Env v Set -> PRED v -> Bool
-check e (Elem x y) = elem (eval e x) (get (eval e y))
-check e (Subset x y) = subset (eval e x) (eval e y)
-check e (And x y) = check e x && check e y
-check e (Or x y) = check e x || check e y
+check e (Elem x y)    = elem (eval e x) (get (eval e y))
+check e (Subset x y)  = subset (eval e x) (eval e y)
+check e (And x y)     = check e x && check e y
+check e (Or x y)      = check e x || check e y
 check e (Implies x y) = check e x ==> check e y
 
 (==>) :: Bool -> Bool -> Bool
 False ==> _ = True
-True ==> p = p
+True ==> p  = p
 
 e = [] :: Env Set Set
 
 subset :: Set -> Set -> Bool
-subset (S []) _ = True
+subset (S []) _          = True
 subset (S (x : xs)) set2 = (x `elem` get set2) && subset (S xs) set2
 
 varVal :: Eq v => Env v Set -> v -> Set
 varVal e v = head [d | (v', d) <- e, v == v']
 
 eval :: Eq v => Env v Set -> TERM v -> Set
-eval e Empty = S []
-eval e (Singleton x) = S [eval e x]
-eval e (Union x y) = unionS (eval e x) (eval e y)
+eval e Empty              = S []
+eval e (Singleton x)      = S [eval e x]
+eval e (Union x y)        = unionS (eval e x) (eval e y)
 eval e (Intersection x y) = intersectS (eval e x) (eval e y)
-eval e (Var var) = varVal e var
+eval e (Var var)          = varVal e var
 
 unionS :: Set -> Set -> Set
 unionS set1 set2 = S (union (get set1) (get set2))
@@ -89,13 +89,11 @@ claim1 n1 n2 = (n1 <= n2) ==> subset (eval e v1) (eval e v2)
     (v1, v2) = (vonNeumann n1, vonNeumann n2)
 
 -- claim2: n = {0, 1,..., n - 1}
---         v = vn U {vn}
 claim2 :: Integer -> Bool
-claim2 0 = eval e (vonNeumann 0) == S []
-claim2 n = eval e v == eval e (Union vn (Singleton vn))
+claim2 n = v == vn
   where
-    v = vonNeumann n
-    vn = vonNeumann (n - 1)
+    v = eval e $ vonNeumann n -- n
+    vn = S [eval e (vonNeumann m) | m <- [0..n-1]]  -- {0, ..., n - 1}
 
 {-
 # Comments check
